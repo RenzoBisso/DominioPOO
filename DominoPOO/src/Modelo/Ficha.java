@@ -54,6 +54,11 @@ public class Ficha {
                 '}';
     }
 
+    public Integer sumar(){
+        return getLadoA()+getLadoB();
+    }
+
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;

@@ -37,8 +37,11 @@ public class Mano extends GrupoFichas{
     }
 
 
-
-
-
-
+    public Integer sumarMano(){
+        Integer total=0;
+        for(Ficha ficha:getFichas()){
+            total+=ficha.sumar();
+        }
+        return total;
+    }
 }

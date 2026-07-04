@@ -70,4 +70,17 @@ public class Mesa {
         }
         return false;
     }
+
+    public boolean fichaValida(Ficha ficha){
+        try{
+            if (getFichasJugadas().isEmpty()) {
+                return true;
+            }
+            return ficha.getLadoA().equals(getExtremoIzquierdo()) || ficha.getLadoA().equals(getExtremoDerecho()) || ficha.getLadoB().equals(getExtremoIzquierdo()) || ficha.getLadoB().equals(getExtremoDerecho());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return false;
+    }
+
 }

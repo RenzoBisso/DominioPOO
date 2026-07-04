@@ -14,12 +14,16 @@ public class Partida {
     private LocalDateTime fechaFin;
     private EstadoPartida estadoPartida;
     private ArrayList<Ronda> rondasJugadas=new ArrayList<>();
+    private ArrayList<JugadorXPartida> jugadores;
 
-
-    public Partida() {
+    public Partida(ArrayList<JugadorXPartida> jugadores, Integer limiteDePuntos) {
         contadorID++;
-        this.id=contadorID;
-        this.fechaInicio=LocalDateTime.now();
+        this.id = contadorID;
+        this.fechaInicio = LocalDateTime.now();
+
+        this.jugadores = jugadores;
+        this.limiteDePuntos = limiteDePuntos;
+        this.estadoPartida = EstadoPartida.EN_CURSO;
     }
 
     public int getId() {
@@ -76,5 +80,32 @@ public class Partida {
 
     public void setRondasJugadas(ArrayList<Ronda> rondasJugadas) {
         this.rondasJugadas = rondasJugadas;
+    }
+    public ArrayList<JugadorXPartida> getJugadores() {
+        return jugadores;
+    }
+
+    public void setJugadores(ArrayList<JugadorXPartida> jugadores) {
+        this.jugadores = jugadores;
+    }
+
+    public boolean verificarFinDePartida() {
+        for (JugadorXPartida jxp : this.jugadores) {
+
+            if (jxp.getPuntosObtenidos() >= this.limiteDePuntos) {
+                this.estadoPartida = EstadoPartida.FINALIZADA;
+                this.fechaFin = LocalDateTime.now();
+                jxp.setGanador(true);
+
+                System.out.println("¡FIN DEL JUEGO! El ganador es: " + jxp.getJugador().getNombre());
+                return true;
+            }
+        }
+        return false;
+    }
+    public Ronda crearNuevaRonda() {
+        Ronda nuevaRonda = new Ronda(this.jugadores);
+        this.rondasJugadas.add(nuevaRonda);
+        return nuevaRonda;
     }
 }
