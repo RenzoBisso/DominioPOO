@@ -178,7 +178,7 @@ public class Ronda implements IObservable {
     public void repartirFichas(){
         try{
             for(Mano mano:getManos()){
-                for(int k=0;k<7;k++){
+                for(int k=0;k<1;k++){
                     mano.agregarFicha(getPozo().extraerFicha(0));
                 }
             }
@@ -248,7 +248,6 @@ public class Ronda implements IObservable {
                 int indiceSiguiente = (indiceActual + 1) % totalJugadores;
                 JugadorXPartida siguienteJugador = this.getManos().get(indiceSiguiente).getJugador();
                 this.setTurnoActual(siguienteJugador);
-                System.out.println("El turno ha pasado a: " + siguienteJugador.getJugador().getNombre());
                 this.notificarObservadores();
             }
         } catch (Exception e) {
@@ -256,7 +255,7 @@ public class Ronda implements IObservable {
         }
     }
 
-    public void determinarTurnoInicial() {
+    public String determinarTurnoInicial() {
         try {
             JugadorXPartida jugadorInicial = null;
             int valorDobleMasAlto = -1;
@@ -276,15 +275,17 @@ public class Ronda implements IObservable {
             }
             if (jugadorInicial == null) {
                 jugadorInicial = this.getManos().getFirst().getJugador();
-                System.out.println("Nadie tiene dobles. El turno inicial es por defecto para: " + jugadorInicial.getJugador().getNombre());
+                this.setTurnoActual(jugadorInicial);
+                return ("Nadie tiene dobles. El turno inicial es por defecto para: " + jugadorInicial.getJugador().getNombre());
             } else {
-                System.out.println("El jugador inicial es " + jugadorInicial.getJugador().getNombre() + " con el doble " + valorDobleMasAlto + "-" + valorDobleMasAlto);
+                this.setTurnoActual(jugadorInicial);
+                return  ("El jugador inicial es " + jugadorInicial.getJugador().getNombre() + " con el doble " + valorDobleMasAlto + "-" + valorDobleMasAlto);
             }
-            this.setTurnoActual(jugadorInicial);
 
         } catch (Exception e) {
             System.out.println("Error al determinar el turno inicial: " + e.getMessage());
         }
+        return "Error";
     }
 
     public void resolverGanadorCierre() {

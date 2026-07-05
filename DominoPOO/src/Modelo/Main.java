@@ -1,16 +1,26 @@
-package Modelo;
+package Modelo; // O el paquete donde tengas tu Main actualmente
 
 import Controlador.ControladorConsola;
 import Vista.VistaConsola.VistaConsola;
 
-
+import javax.swing.SwingUtilities;
 
 public class Main {
     public static void main(String[] args) {
-        VistaConsola vista = new VistaConsola();
-        Partida partida = null;
-        ControladorConsola controlador = new ControladorConsola(vista,partida);
 
-        controlador.iniciar();
+        SwingUtilities.invokeLater(() -> {
+            VistaConsola vista = new VistaConsola();
+
+            Thread gameThread = new Thread(() -> {
+
+                ControladorConsola controlador = new ControladorConsola(vista);
+                vista.setControlador(controlador);
+
+                controlador.iniciar();
+
+            });
+
+            gameThread.start();
+        });
     }
 }

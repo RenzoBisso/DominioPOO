@@ -15,6 +15,7 @@ public class Partida {
     private EstadoPartida estadoPartida;
     private ArrayList<Ronda> rondasJugadas=new ArrayList<>();
     private ArrayList<JugadorXPartida> jugadores;
+    private Jugador ganador;
 
     public Partida(ArrayList<JugadorXPartida> jugadores, Integer limiteDePuntos) {
         contadorID++;
@@ -24,6 +25,14 @@ public class Partida {
         this.jugadores = jugadores;
         this.limiteDePuntos = limiteDePuntos;
         this.estadoPartida = EstadoPartida.EN_CURSO;
+    }
+
+    public Jugador getGanador() {
+        return ganador;
+    }
+
+    public void setGanador(Jugador ganador) {
+        this.ganador = ganador;
     }
 
     public int getId() {
@@ -96,8 +105,9 @@ public class Partida {
                 this.estadoPartida = EstadoPartida.FINALIZADA;
                 this.fechaFin = LocalDateTime.now();
                 jxp.setGanador(true);
+                this.setGanador(jxp.getJugador());
 
-                System.out.println("¡FIN DEL JUEGO! El ganador es: " + jxp.getJugador().getNombre());
+
                 return true;
             }
         }

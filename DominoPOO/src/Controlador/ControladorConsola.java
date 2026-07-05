@@ -11,7 +11,7 @@ public class ControladorConsola {
     private Partida partida;
     private Ronda rondaActual;
 
-    public ControladorConsola(VistaConsola vista, Partida partida) {
+    public ControladorConsola(VistaConsola vista) {
         this.vista = vista;
         this.partida = partida;
         this.vista.setControlador(this);
@@ -34,6 +34,7 @@ public class ControladorConsola {
                     break;
                 case 0:
                     vista.mostrarMensaje("Saliendo...");
+                    salir();
                     return;
                 default:
                     vista.mostrarMensaje("Opcion invalida");
@@ -43,19 +44,24 @@ public class ControladorConsola {
     }
 
     private void mostrarReglas() {
+
         vista.mostrarReglasDomino();
     }
 
-    public void iniciarJuego(){
 
-        while(true){
 
-            vista.mostrarMensaje("--Mano del jugador--");
-            vista.mostrarMano(rondaActual.obtenerMano(rondaActual.getTurnoActual()).getFichas());
-            vista.mostrarInfoJugadores(this.partida.getJugadores());
+    public void iniciarJuego() {
+        boolean juegoTerminado = false;
+        vista.actualizar();
+        vista.mostrarMensaje("--Mano del jugador--");
+        vista.mostrarMano(rondaActual.obtenerMano(rondaActual.getTurnoActual()).getFichas());
+        vista.mostrarInfoJugadores(this.partida.getJugadores());
+        vista.mostrarMenuJuego();
+        while (!juegoTerminado) {
             vista.mostrarMenuJuego();
-            int opcion= vista.obtenerOpcion();
-            switch (opcion){
+            int accion = vista.obtenerOpcion();
+
+            switch (accion) {
                 case 1:
                     colocarFicha();
                     break;
@@ -64,17 +70,30 @@ public class ControladorConsola {
                     break;
                 case 3:
                     pasar();
+                    break;
                 case 4:
                     mostrarMano();
                     break;
                 case 0:
-                    vista.mostrarMensaje("Saliendo...");
-                    return;
-                default:
-                    vista.mostrarMensaje("Opcion invalida");
+                    juegoTerminado = true;
+                    break;
+            }
+
+            if (partida.verificarFinDePartida()) {
+                juegoTerminado = true;
             }
         }
 
+
+    }
+
+    private void salir() {
+        try {
+            Thread.sleep(1000);
+            System.exit(0);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void mostrarMano() {
@@ -107,13 +126,11 @@ public class ControladorConsola {
             if (rondaActual.detectarDomino()) {
                 if(gestionarFinDeRonda()){
                     vista.mostrarInfoJugadores(this.partida.getJugadores());
-                    iniciar();
                 }
             } else if (rondaActual.detectarCierre()) {
                 rondaActual.resolverGanadorCierre();
                 if(gestionarFinDeRonda()){
                     vista.mostrarInfoJugadores(this.partida.getJugadores());
-                    iniciar();
                 }
             } else {
                 rondaActual.avanzarTurno();
@@ -125,7 +142,7 @@ public class ControladorConsola {
     public boolean robarFicha() {
         vista.mostrarPozo(rondaActual.getPozo().getFichasPozo());
         int indice=vista.obtenerOpcion("Ingrese el indice de la ficha a robar o -1 para cancelar");
-        if(indice>0){
+        if(indice>=0){
             boolean robo = rondaActual.robarFicha(indice);
         }
         return false;
@@ -146,8 +163,11 @@ public class ControladorConsola {
 
         if (!partida.verificarFinDePartida()) {
             this.rondaActual = partida.crearNuevaRonda();
+            this.rondaActual.agregarObservador(vista);
             this.rondaActual.determinarTurnoInicial();
         }
+        vista.mostrarMensaje("¡FIN DEL JUEGO! El ganador es: " + this.partida.getGanador().getNombre());
+
         return true;
 
     }
@@ -182,7 +202,7 @@ public class ControladorConsola {
 
         this.rondaActual.agregarObservador(vista);
 
-        this.rondaActual.determinarTurnoInicial();
+        vista.mostrarMensaje(this.rondaActual.determinarTurnoInicial());
 
         iniciarJuego();
     }
