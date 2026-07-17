@@ -1,10 +1,13 @@
 package Modelo;
 
+import Observer.IObservable;
+import Observer.IObservador;
+
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 
-public class Partida {
+public class Partida implements IObservable {
 
     private static int contadorID=0;
     private int id;
@@ -14,8 +17,9 @@ public class Partida {
     private LocalDateTime fechaFin;
     private EstadoPartida estadoPartida;
     private ArrayList<Ronda> rondasJugadas=new ArrayList<>();
-    private ArrayList<JugadorXPartida> jugadores;
+    private ArrayList<JugadorXPartida> jugadores=new ArrayList<>();
     private Jugador ganador;
+    private ArrayList<IObservador> observadores = new ArrayList<>();
 
     public Partida(ArrayList<JugadorXPartida> jugadores, Integer limiteDePuntos) {
         contadorID++;
@@ -26,6 +30,7 @@ public class Partida {
         this.limiteDePuntos = limiteDePuntos;
         this.estadoPartida = EstadoPartida.EN_CURSO;
     }
+
 
     public Jugador getGanador() {
         return ganador;
@@ -106,7 +111,7 @@ public class Partida {
                 this.fechaFin = LocalDateTime.now();
                 jxp.setGanador(true);
                 this.setGanador(jxp.getJugador());
-
+                this.notificarObservadores();
 
                 return true;
             }
@@ -117,5 +122,22 @@ public class Partida {
         Ronda nuevaRonda = new Ronda(this.jugadores);
         this.rondasJugadas.add(nuevaRonda);
         return nuevaRonda;
+    }
+
+    @Override
+    public void agregarObservador(IObservador observador) {
+        this.observadores.add(observador);
+    }
+
+    @Override
+    public void quitarObservador(IObservador observador) {
+        this.observadores.remove(observador);
+    }
+
+    @Override
+    public void notificarObservadores() {
+        for (IObservador obs : this.observadores) {
+            obs.actualizar();
+        }
     }
 }

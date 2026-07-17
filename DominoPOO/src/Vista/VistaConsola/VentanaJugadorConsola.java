@@ -1,28 +1,31 @@
 package Vista.VistaConsola;
 
+import Vista.IVentanaJugador;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-public class VentanaJugador {
+public class VentanaJugadorConsola implements IVentanaJugador {
     private JFrame frame;
     private JTextArea textArea;
     private JTextField textField;
     private BlockingQueue<String> inputQueue;
 
-    public VentanaJugador(String tituloVentana) {
+
+
+
+    public VentanaJugadorConsola(String tituloVentana) {
         inputQueue = new ArrayBlockingQueue<>(1);
         inicializarGUI(tituloVentana);
     }
 
-    private void inicializarGUI(String titulo) {
+    void inicializarGUI(String titulo) {
         frame = new JFrame(titulo);
         frame.setSize(500, 600);
         frame.setLayout(new BorderLayout());
-        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         textArea = new JTextArea();
         textArea.setEditable(false);
@@ -48,6 +51,9 @@ public class VentanaJugador {
         frame.setVisible(true);
     }
 
+
+
+    @Override
     public void imprimirMensaje(String mensaje) {
         SwingUtilities.invokeLater(() -> {
             textArea.append(mensaje + "\n");
@@ -55,15 +61,20 @@ public class VentanaJugador {
         });
     }
 
+    @Override
     public String obtenerInput() throws InterruptedException {
         return inputQueue.take();
     }
 
+    @Override
     public void setInputHabilitado(boolean habilitado) {
         textField.setEnabled(habilitado);
         if(habilitado) textField.requestFocusInWindow();
     }
+    @Override
     public void cerrarVentana() {
         frame.dispose();
     }
+
+
 }

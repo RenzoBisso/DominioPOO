@@ -9,6 +9,7 @@ public class JugadorXPartida {
 
     public JugadorXPartida(Jugador jugador) {
         this.jugador = jugador;
+        this.setPuntosObtenidos(0);
     }
 
     public Integer getPuntosObtenidos() {

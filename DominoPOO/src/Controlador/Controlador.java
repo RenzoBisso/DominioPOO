@@ -1,35 +1,38 @@
 package Controlador;
 
 import Modelo.*;
-import Vista.VistaConsola.VistaConsola;
+import Vista.IVista;
 
 import java.util.ArrayList;
 
-public class ControladorConsola {
 
-    private VistaConsola vista;
-    private Partida partida;
-    private Ronda rondaActual;
+public class Controlador implements IControlador {
+    IVista vista = null;
+    Partida partida=null;
+    Ronda rondaActual=null;
 
-    public ControladorConsola(VistaConsola vista) {
+
+    public Controlador(IVista vista) {
         this.vista = vista;
         this.partida = partida;
         this.vista.setControlador(this);
     }
 
+    @Override
     public void iniciar(){
-
         while(true){
             vista.mostrarMenuPrincipal();
             int opcion= vista.obtenerOpcion();
             switch (opcion){
                 case 1:
-                    crearPartida();
+                    crearPartidaLocal();
                     break;
                 case 2:
                     entrarPartida();
                     break;
                 case 3:
+                    crearPartidaLAN();
+                case 4:
                     mostrarReglas();
                     break;
                 case 0:
@@ -43,13 +46,17 @@ public class ControladorConsola {
 
     }
 
-    private void mostrarReglas() {
 
-        vista.mostrarReglasDomino();
+
+    @Override
+    public void mostrarReglas() {
+
+        this.vista.mostrarReglasDomino();
+
     }
 
 
-
+    @Override
     public void iniciarJuego() {
         boolean juegoTerminado = false;
         vista.actualizar();
@@ -83,11 +90,10 @@ public class ControladorConsola {
                 juegoTerminado = true;
             }
         }
-
-
     }
 
-    private void salir() {
+    @Override
+    public void salir() {
         try {
             Thread.sleep(1000);
             System.exit(0);
@@ -96,10 +102,12 @@ public class ControladorConsola {
         }
     }
 
-    private void mostrarMano() {
+    @Override
+    public void mostrarMano() {
         vista.mostrarMano(rondaActual.obtenerMano(rondaActual.getTurnoActual()).getFichas());
     }
 
+    @Override
     public boolean colocarFicha() {
         vista.mostrarMensaje("Mesa");
         vista.mostrarMesa(rondaActual.getMesa().getFichasJugadas());
@@ -136,23 +144,12 @@ public class ControladorConsola {
                 rondaActual.avanzarTurno();
             }
         }
+
         return jugadaExitosa;
     }
 
-    public boolean robarFicha() {
-        vista.mostrarPozo(rondaActual.getPozo().getFichasPozo());
-        int indice=vista.obtenerOpcion("Ingrese el indice de la ficha a robar o -1 para cancelar");
-        if(indice>=0){
-            boolean robo = rondaActual.robarFicha(indice);
-        }
-        return false;
-    }
-
-    public boolean pasar() {
-        return rondaActual.intentarPasarTurno();
-    }
-
-    private boolean gestionarFinDeRonda() {
+    @Override
+    public boolean gestionarFinDeRonda() {
         JugadorXPartida ganadorRonda = rondaActual.getJugadorGanador();
         int puntosGanados = rondaActual.getPuntosGanador();
 
@@ -165,41 +162,49 @@ public class ControladorConsola {
             this.rondaActual = partida.crearNuevaRonda();
             this.rondaActual.agregarObservador(vista);
             this.rondaActual.determinarTurnoInicial();
+            return false;
         }
-        vista.mostrarMensaje("¡FIN DEL JUEGO! El ganador es: " + this.partida.getGanador().getNombre());
+        vista.mensajeGlobal("¡FIN DEL JUEGO! El ganador es: " + this.partida.getGanador().getNombre());
 
         return true;
 
     }
 
-    private void entrarPartida() {
+    @Override
+    public void entrarPartida() {
+
     }
 
-    private void crearPartida() {
+
+    @Override
+    public Partida getPartida() {
+        return this.partida;
+    }
+
+    @Override
+    public void crearPartidaLocal() {
         vista.mostrarMensaje("\n--- INICIANDO PARTIDA LOCAL ---");
+        ArrayList<JugadorXPartida> listaJugadores = new ArrayList<>();
 
-        String nombre1 = vista.obtenerDato("el nombre del Jugador 1");
-        String nombre2 = vista.obtenerDato("el nombre del Jugador 2");
+        int cantidadJugadores=vista.obtenerOpcion("cantidad de jugadores");
 
-        Jugador j1 = new Jugador(nombre1, null);
-        Jugador j2 = new Jugador(nombre2, null);
 
-        JugadorXPartida jxp1 = new JugadorXPartida(j1);
-        jxp1.setPuntosObtenidos(0);
-        JugadorXPartida jxp2 = new JugadorXPartida(j2);
-        jxp2.setPuntosObtenidos(0);
+        for(int k=0;k<cantidadJugadores;k++){
+            String nombre = vista.obtenerDato("el nombre del Jugador "+k);
+            Jugador j = new Jugador(nombre, null);
+            JugadorXPartida jxp = new JugadorXPartida(j);
+            jxp.setPuntosObtenidos(0);
+            listaJugadores.add(jxp);
+
+        }
+
 
         int puntos = vista.obtenerOpcion("Ingrese los puntos a conseguir");
-
-
-        ArrayList<JugadorXPartida> listaJugadores = new ArrayList<>();
-        listaJugadores.add(jxp1);
-        listaJugadores.add(jxp2);
 
         this.partida = new Partida(listaJugadores, puntos);
 
         this.rondaActual = this.partida.crearNuevaRonda();
-
+        this.partida.agregarObservador(vista);
         this.rondaActual.agregarObservador(vista);
 
         vista.mostrarMensaje(this.rondaActual.determinarTurnoInicial());
@@ -207,6 +212,39 @@ public class ControladorConsola {
         iniciarJuego();
     }
 
+    public void crearPartidaLocal(ArrayList<JugadorXPartida>jugadores, Integer puntos) {
+
+            this.partida = new Partida(jugadores, puntos);
+            this.rondaActual = this.partida.crearNuevaRonda();
+            this.partida.agregarObservador(vista);
+            this.rondaActual.agregarObservador(vista);
+            vista.mostrarMensaje(this.rondaActual.determinarTurnoInicial());
+            iniciarJuego();
+    }
+
+
+    @Override
+    public void crearPartidaLAN() {
+
+    }
+
+
+    @Override
+    public boolean robarFicha() {
+        vista.mostrarPozo(rondaActual.getPozo().getFichasPozo());
+        int indice=vista.obtenerOpcion("Ingrese el indice de la ficha a robar o -1 para cancelar");
+        if(indice>=0){
+            boolean robo = rondaActual.robarFicha(indice);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean pasar() {
+        return rondaActual.intentarPasarTurno();
+    }
+
+    @Override
     public Ronda getRondaActual() {
         return this.rondaActual;
     }

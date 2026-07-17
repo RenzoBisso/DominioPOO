@@ -178,7 +178,7 @@ public class Ronda implements IObservable {
     public void repartirFichas(){
         try{
             for(Mano mano:getManos()){
-                for(int k=0;k<1;k++){
+                for(int k=0;k<7;k++){
                     mano.agregarFicha(getPozo().extraerFicha(0));
                 }
             }
